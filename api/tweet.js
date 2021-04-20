@@ -31,6 +31,8 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+//get all tweets by user id
+
 // Post a tweet
 router.post('/', async (req, res) => {
     const body = req.body.body
@@ -46,6 +48,56 @@ router.post('/', async (req, res) => {
     } catch (e) {
         console.log(e)
         res.sendStatus(500)
+    }
+})
+
+// Edit tweet
+router.put('/', async (req, res) => {
+    try {
+        //get tweet id
+        //check if tweet belongs to user
+        //update tweet or error
+    } catch (e) {
+
+    }
+})
+
+// Delete tweet
+router.delete('/', async (req, res) => {
+    try {
+        //get tweet id
+        //check if tweet belongs to user
+        //delete tweet or error
+    } catch (e) {
+
+    }
+})
+
+router.post('/like', async (req, res) => {
+    try {
+        //check if user has liked tweet
+        //if liked send true else send false 
+    } catch (e) {
+
+    }
+})
+
+router.post('/retweet', async (req, res) => {
+    try {
+        //get user id
+        //get tweet id
+        //add to user_tweets table
+    } catch (e) {
+
+    }
+})
+
+router.post('/reply', async (req, res) => {
+    try {
+        //get parent tweet id
+        //add to tweet_replies table
+    } catch (e) {
+
     }
 })
 

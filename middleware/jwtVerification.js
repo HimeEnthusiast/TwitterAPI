@@ -1,11 +1,5 @@
 const jwt = require('jsonwebtoken')
 
-const requireJwtRoutes = new Map()
-requireJwtRoutes.set("/tweet", { get: false, post: true, put: true, delete: true })
-requireJwtRoutes.set("/jwt/login", { post: false })
-requireJwtRoutes.set("/users", { post: false })
-requireJwtRoutes.set("/chat", { get: true, post: true })
-
 const requireJWTRoutes = [
     { path: "/tweet", get: false, post: true, put: true, delete: true },
     { path: "/jwt/login", post: false },
