@@ -11,7 +11,6 @@ const requireJWTRoutes = [
 function jwtVerificationMiddleware(req, res, next) {
     let accessResponse = false
     const url = new URL('http://localhost' + req.url)
-    console.log(url)
     try {
         accessResponse = verifyRestMethodAccess(req.method, url.pathname)
     } catch (e) {

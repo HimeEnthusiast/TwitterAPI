@@ -34,6 +34,18 @@ twitterDB.getOneTweet = (tweetId) => {
     })
 }
 
+twitterDB.getUserLikes = (userId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM user_likes WHERE userId = ?', [userId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
+        })
+    })
+}
+
 twitterDB.postTweet = (body, userId) => {
     return new Promise((resolve, reject) => {
         pool.query('INSERT INTO tweet (body, likes, userId, date) VALUES (?, 0, ?, now())', [body, userId], (err, results) => {
@@ -41,7 +53,55 @@ twitterDB.postTweet = (body, userId) => {
                 return reject(err)
             }
 
+            return resolve(results)
+        })
+    })
+}
+
+twitterDB.saveUserTweet = (userId, tweetId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('INSERT INTO user_tweets VALUES (?, ?)', [userId, tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
             return resolve(results[0])
+        })
+    })
+}
+
+twitterDB.retweet = (tweetId, isRetweeted) => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE tweet SET retweets = retweets' + ((isRetweeted) ? ' - 1 ' : ' + 1 ') + 'WHERE id = ?', [tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
+        })
+    })
+}
+
+twitterDB.deleteUserTweet = (userId, tweetId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM user_tweets WHERE userID = ? AND tweetID = ?', [userId, tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
+        })
+    })
+}
+
+twitterDB.getUserTweets = (userId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM user_tweets WHERE userId = ?', [userId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
         })
     })
 }
@@ -65,7 +125,7 @@ twitterDB.deleteTweet = (tweetId) => {
                 return reject(err)
             }
 
-            return resolve(results[0])
+            return resolve(results)
         })
     })
 }
@@ -77,17 +137,57 @@ twitterDB.likeTweet = (tweetId, isLiked) => {
                 return reject(err)
             }
 
-            return resolve(results[0])
+            return resolve(results)
         })
     })
 }
 
-twitterDB.retweet = (id, userId) => {
+twitterDB.saveLike = (userId, tweetId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('INSERT INTO user_likes VALUES (?, ?)', [userId, tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
 
+            return resolve(results)
+        })
+    })
 }
 
-twitterDB.reply = (Id, body, userId) => {
+twitterDB.deleteLike = (userId, tweetId) => {//delete from userlikes where userid = ? AND tweetId = ?
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM user_likes WHERE userID = ? AND tweetID = ?', [userId, tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
 
+            return resolve(results)
+        })
+    })
+}
+
+twitterDB.reply = (tweetId, replyId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('INSERT INTO tweet_replies VALUES (?, ?)', [tweetId, replyId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
+        })
+    })
+}
+
+twitterDB.getReplies = (tweetId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT tweet.id, tweet.body, tweet.likes, tweet.userID, tweet.date FROM tweet JOIN tweet_replies ON tweet.id = tweet_replies.replyID WHERE tweet_replies.tweetID = ? ORDER BY tweet.id;', [tweetId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+
+            return resolve(results)
+        })
+    })
 }
 
 module.exports = twitterDB
