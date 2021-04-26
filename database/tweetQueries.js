@@ -1,11 +1,11 @@
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-    user: 'root',
-    password: 'root',
-    database: 'twitterDB',
-    host: 'localhost',
-    port: 3306
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT
 })
 
 let twitterDB = {}
@@ -16,7 +16,6 @@ twitterDB.getAllTweets = () => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -28,7 +27,6 @@ twitterDB.getOneTweet = (tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results[0])
         })
     })
@@ -40,7 +38,6 @@ twitterDB.getUserLikes = (userId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -52,7 +49,6 @@ twitterDB.postTweet = (body, userId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -64,7 +60,6 @@ twitterDB.saveUserTweet = (userId, tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results[0])
         })
     })
@@ -76,7 +71,6 @@ twitterDB.retweet = (tweetId, isRetweeted) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -88,7 +82,6 @@ twitterDB.deleteUserTweet = (userId, tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -100,7 +93,6 @@ twitterDB.getUserTweets = (userId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -112,7 +104,6 @@ twitterDB.updateTweet = (body, tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results[0])
         })
     })
@@ -124,7 +115,6 @@ twitterDB.deleteTweet = (tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -136,7 +126,6 @@ twitterDB.likeTweet = (tweetId, isLiked) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -148,7 +137,6 @@ twitterDB.saveLike = (userId, tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -160,7 +148,6 @@ twitterDB.deleteLike = (userId, tweetId) => {//delete from userlikes where useri
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -172,7 +159,6 @@ twitterDB.reply = (tweetId, replyId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })
@@ -184,7 +170,6 @@ twitterDB.getReplies = (tweetId) => {
             if (err) {
                 return reject(err)
             }
-
             return resolve(results)
         })
     })

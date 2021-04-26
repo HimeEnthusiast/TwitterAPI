@@ -139,7 +139,7 @@ router.post('/retweet', async (req, res) => {
             res.send({ message: "Un-Retweeted tweet." })
         } else {
             tweetDb.retweet(req.body.id, false)
-            res.send({ message: "Un-Retweeted tweet." })
+            res.send({ message: "Retweeted tweet." })
         }
     } catch (e) {
         console.log(e)
@@ -165,7 +165,6 @@ async function threadTweets(parentTweetId, thread, replies) {
     thread.topTweet = parentTweet
 
     if (replyResults) {
-        thread.topTweet = parentTweet
         for (i = 0; i < replyResults.length; i++) {
             let subReplyResults = await tweetDb.getReplies(replyResults[i].id)
             if (subReplyResults[0]) {
@@ -175,8 +174,6 @@ async function threadTweets(parentTweetId, thread, replies) {
         }
         thread.topTweet.replies = replies
 
-    } else {
-        thread.topTweet = parentTweet
     }
 
     return thread

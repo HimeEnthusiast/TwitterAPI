@@ -1,4 +1,5 @@
 const express = require('express')
+const env = require('dotenv').config()
 const jwtVerificationMiddleware = require('./middleware/jwtVerification')
 const app = express()
 const port = 3000
@@ -18,7 +19,11 @@ app.get('/', (req, res) => {
   res.send('Hello Twitter!')
 })
 
-// Boot message
-app.listen(port, () => {
-  console.log(`Twitter app listening at http://localhost:${port}`)
-})
+// Runs when jest tests aren't active
+if (process.env.JEST_WORKER_ID == undefined) {
+  app.listen(port, () => {
+    console.log(`Twitter app listening at http://localhost:${port}`)
+  })
+}
+
+module.exports = app

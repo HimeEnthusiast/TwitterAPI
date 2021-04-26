@@ -26,7 +26,7 @@ function jwtVerificationMiddleware(req, res, next) {
             req.token = token
         }
 
-        jwt.verify(req.token, 'secretkey', async (err, data) => {
+        jwt.verify(req.token, process.env.JWT_SECRET, async (err, data) => {
             if (err) {
                 res.status(401).send({ message: 'jwt determined invalid' })
             } else {
