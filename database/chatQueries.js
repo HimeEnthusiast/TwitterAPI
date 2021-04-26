@@ -45,7 +45,7 @@ twitterDB.sendMessage = (body, userId, convoId) => {
 
 twitterDB.getConversationMessages = (convoId) => {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM message WHERE convoID = ?', [convoId], (err, results) => {
+        pool.query('SELECT message.id, message.body, message.date, user.username FROM message JOIN user ON message.userID = user.id WHERE convoID = ? ORDER BY message.date', [convoId], (err, results) => {
             if (err) {
                 return reject(err)
             }

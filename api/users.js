@@ -2,25 +2,34 @@ const express = require('express')
 const router = express.Router()
 const db = require('../database/userQueries')
 
-router.get('/', (req, res) => {
-    res.send("hello")
-})
 
 // Register new account
 router.post('/', async (req, res) => {
+    let user
+
     try {
         // Checking if username is in DB
-        let user = await db.getOneUserByUsername(req.body.username)
-        if (user[0]) {
-            res.status(409).send("Username already taken")
-        } else {
+        user = await db.getOneUserByUsername(req.body.username)
+    } catch (e) {
+        res.status(500).send({ 
+            message: "Error getting user",
+            error: e 
+        })
+    }
+
+    if (user[0]) {
+        res.status(409).send({ message: "Username already taken" })
+    } else {
+        try {
             // Create user
             db.insertOneUser(req.body.username, req.body.password)
-            res.send("User account created")
+            res.send({ message: "User account created" })
+        } catch (e) {
+            res.status(500).send({ 
+                message: "User could not be inserted into database",
+                error: e
+            })
         }
-    } catch (e) {
-        console.log(e)
-        res.sendStatus(500)
     }
 })
 
