@@ -34,11 +34,11 @@ twitterDB.getOneUserById = (id) => {
 
 twitterDB.getOneUserByUsername = (username) => {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM user WHERE username = ? LIMIT 1', [username.toLowerCase()], (err, results) => {
+        pool.query('SELECT * FROM user WHERE username = ?', [username.toLowerCase()], (err, results) => {
             if (err) {
                 return reject(err)
             }
-            return resolve(results)
+            return resolve(results[0])
         })
     })
 }
@@ -49,7 +49,7 @@ twitterDB.insertOneUser = (username, password) => {
             if (err) {
                 return reject(err)
             }
-            return resolve(results[0])
+            return resolve(results)
         })
     })
 }

@@ -18,26 +18,25 @@ router.get('/', async (req, res) => {
         })
     }
 
-    if (typeof conversationId != Object) {
-        if (typeof conversation != Object) {
-            try {
-                conversation = await getConversationMessages(conversationId.id)
-            } catch (e) {
-                res.status(500).send({
-                    message: "Error getting messages",
-                    error: e
-                })
-            }
-            res.send(conversation)
-        } else if (conversation === 404) {
-            res.status(404).send({ message: "Conversation could not be found" })
-        } else if (conversation === 500) {
-            res.status(500).send({ message: "Error getting conversation." })
+    if (!('status' in conversationId)) {
+        try {
+            conversation = await getConversationMessages(conversationId.id)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting messages",
+                error: e
+            })
         }
-    } else if (conversation === 500) {
-        res.status(500).send({ message: "Error getting conversation." })
-    } else if (conversation === 404) {
-        res.status(404).send({ message: 'User does not exist.' })
+        res.send(conversation)
+    } else if (conversationId.status === 500) {
+        res.status(500).send({
+            message: "Error getting conversation.",
+            error: conversationId.error
+        })
+    } else if (conversationId.status === 404) {
+        res.status(404).send({
+            message: 'Conversation could not be found'
+        })
     }
 })
 
@@ -55,7 +54,7 @@ router.post('/', async (req, res) => {
         })
     }
 
-    if (typeof conversation != Number) {
+    if (!('status' in conversation)) {
         try {
             chatDb.sendMessage(req.body.body, conversation.currentUser, conversation.id)
         } catch (e) {
@@ -84,12 +83,12 @@ router.post('/', async (req, res) => {
             message: 'Message sent.',
             chat: messages
         })
-    } else if (conversation === 500) {
+    } else if (conversation.status === 500) {
         res.status(500).send({
             message: "Error getting conversation",
             error: e
         })
-    } else if (conversation === 404) {
+    } else if (conversation.status === 404) {
         res.status(404).send('User does not exist.')
     }
 })
@@ -141,14 +140,9 @@ async function getConversationId(usernameA, usernameB) {
                 }
             }
         } else {
-            return {
-                status: 404,
-                message: "Conversation could not be found"
-            }
+            conversation[0]["currentUser"] = userA[0].id
+            return conversation[0]
         }
-
-        conversation[0]["currentUser"] = userA[0].id
-        return conversation[0]
     } else {
         return {
             status: 404,

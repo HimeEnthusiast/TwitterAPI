@@ -19,10 +19,10 @@ router.post('/login', async (req, res) => {
         })
     }
 
-    if (!userResult[0]) {
+    if (!userResult) {
         res.status(401).send({message: "Account access denied"})
     } else {
-        if (userResult[0].password === user.password) {
+        if (userResult.password === user.password) {
             jwt.sign({ user: user }, process.env.JWT_SECRET, (err, token) => {
                 res.json({ token })
             })

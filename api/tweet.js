@@ -7,8 +7,8 @@ const userDb = require('../database/userQueries')
 // get all tweets
 router.get('/', async (req, res) => {
     try {
-        let results = await tweetDb.getAllTweets()
-        res.send(results)
+        let tweets = await tweetDb.getAllTweets()
+        res.send(tweets)
     } catch (e) {
         res.status(500).send({
             message: "Error getting tweets",
@@ -19,10 +19,10 @@ router.get('/', async (req, res) => {
 
 // get one tweet by id
 router.get('/:id', async (req, res) => {
-    let result
+    let tweet
 
     try {
-        result = await tweetDb.getOneTweet(req.params.id)
+        tweet = await tweetDb.getOneTweet(req.params.id)
     } catch (e) {
         res.status(500).send({
             message: "Error getting tweet",
@@ -31,13 +31,31 @@ router.get('/:id', async (req, res) => {
     }
 
     if (result) {
-        res.send(result)
+        res.send(tweet)
     } else {
         res.status(404).send({ message: "Tweet does not exist." })
     }
 })
 
 //get all tweets by user id
+router.get('/user/:id', async (req, res) => {
+    let tweets
+
+    try {
+        tweets = await tweetDb.getUserTweetsWithRetweets(req.params.id)
+    } catch (e) {
+        res.status(500).send({
+            message: "Error getting tweet",
+            error: e
+        })
+    }
+
+    if (tweets) {
+        res.send(tweets)
+    } else {
+        res.status(404).send({ message: "Tweet does not exist." })
+    }
+})
 
 // Post a tweet
 router.post('/', async (req, res) => {
@@ -54,7 +72,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        tweet = tweetDb.postTweet(req.body.body, user[0].id)
+        tweet = await tweetDb.postTweet(req.body.body, user[0].id)
     } catch (e) {
         res.status(500).send({
             message: "Error posting tweet",
@@ -73,16 +91,17 @@ router.post('/', async (req, res) => {
 
     res.send({
         message: 'Tweet posted.',
-        tweet: body
+        tweet: req.body.body
     })
 })
 
 // Edit tweet
 router.put('/', async (req, res) => {
     let tweet
+    let user
 
     try {
-        userDb.getOneUserByUsername(req.body.user.user.username)
+        user = userDb.getOneUserByUsername(req.body.user.user.username)
     } catch (e) {
         res.status(500).send({
             message: "Error getting user",
@@ -99,10 +118,18 @@ router.put('/', async (req, res) => {
         })
     }
 
-    if (tweet[0].userId == user[0].id) {
-        tweetDb.updateTweet(req.body.body, tweet[0].id)
+    if (tweet) {
+        if (tweet.userID === user.id) {
+            tweetDb.updateTweet(req.body.body, tweet.id)
+            res.send({
+                message: "Tweet updated.",
+                body: req.body.body
+            })
+        } else {
+            res.status(403).send({ message: "Forbidden." })
+        }
     } else {
-        res.status(403).send({ message: "Forbidden." })
+        res.status(404).send({ message: "Tweet does not exist." })
     }
 })
 
@@ -129,12 +156,16 @@ router.delete('/', async (req, res) => {
         })
     }
 
-    if (tweet[0].userId == user[0].id) {
-        tweetDb.deleteTweet(tweet[0].id)
-        tweetDb.deleteUserTweet(user[0].id, tweet[0].id)
-        res.send({ message: "Tweet deleted." })
+    if (tweet) {
+        if (tweet.userID === user[0].id) {
+            tweetDb.deleteTweet(tweet.id)
+            tweetDb.deleteUserTweet(user[0].id, tweet.id)
+            res.send({ message: "Tweet deleted." })
+        } else {
+            res.status(403).send({ message: "Forbidden." })
+        }
     } else {
-        res.status(403).send({ message: "Forbidden." })
+        res.status(404).send({ message: "Tweet does not exist" })
     }
 })
 
@@ -215,10 +246,11 @@ router.post('/retweet', async (req, res) => {
     }
 
     if (isRetweeted) {
-        tweetDb.saveUserTweet(user[0].id, req.body.id)
+        tweetDb.deleteUserTweet(user[0].id, req.body.id)
         tweetDb.retweet(req.body.id, true)
         res.send({ message: "Un-Retweeted tweet." })
     } else {
+        tweetDb.saveUserTweet(user[0].id, req.body.id)
         tweetDb.retweet(req.body.id, false)
         res.send({ message: "Retweeted tweet." })
     }

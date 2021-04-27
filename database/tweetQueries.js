@@ -60,7 +60,7 @@ twitterDB.saveUserTweet = (userId, tweetId) => {
             if (err) {
                 return reject(err)
             }
-            return resolve(results[0])
+            return resolve(results)
         })
     })
 }
@@ -98,13 +98,24 @@ twitterDB.getUserTweets = (userId) => {
     })
 }
 
+twitterDB.getUserTweetsWithRetweets = (userId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT tweet.id, tweet.body, tweet.likes, tweet.retweets, tweet.date, tweet.userID FROM tweet JOIN user_tweets ON tweet.id = user_tweets.tweetID WHERE user_tweets.userID = ?', [userId], (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+            return resolve(results)
+        })
+    })
+}
+
 twitterDB.updateTweet = (body, tweetId) => {
     return new Promise((resolve, reject) => {
         pool.query('UPDATE tweet SET body = ? WHERE id = ?', [body, tweetId], (err, results) => {
             if (err) {
                 return reject(err)
             }
-            return resolve(results[0])
+            return resolve(results)
         })
     })
 }

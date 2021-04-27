@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS twitterDB;
 CREATE DATABASE twitterDB;
 USE twitterDB;
 

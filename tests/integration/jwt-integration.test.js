@@ -1,4 +1,4 @@
-const app = require('../../../main')
+const app = require('../../main')
 const request = require('supertest')
 const randomstr = require('randomstring')
 

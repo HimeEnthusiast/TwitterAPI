@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
         })
     }
 
-    if (user[0]) {
+    if (user) {
         res.status(409).send({ message: "Username already taken" })
     } else {
         try {
