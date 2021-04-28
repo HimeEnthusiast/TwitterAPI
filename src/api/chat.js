@@ -27,7 +27,7 @@ router.get('/:username', async (req, res) => {
     if (conversationId) {
         if (!('status' in conversationId)) { // If conversationId object doesn't return a status code
             try {
-                conversation = await getConversationMessages(conversationId.id)
+                conversation = getConversationMessages(conversationId.id)
             } catch (e) {
                 res.status(500).send({
                     message: conversationId.message,
@@ -50,23 +50,25 @@ router.get('/:username', async (req, res) => {
                 currentUser: req.body.user.user.username,
                 targetUser: req.params.username
             })
+        } else if (conversationId.status === 400) {
+            res.status(400).send({
+                message: conversationId.message,
+                currentUser: req.body.user.user.username,
+                targetUser: req.params.username
+            })
         }
     } else {
-        res.status(404).send({
-            message: "Conversation not found.",
-            currentUser: req.body.user.user.username,
-            targetUser: req.params.username
-        })
+        res.send({})
     }
 })
 
 /**
  * @function
  * @name POST /chat/
- * @description Gets conversation between current logged in user and specified user
+ * @description Sends a message in conversation between current logged in user and specified user
  * @param {String} username - Recipient user
  * @param {String} body - Message body
- * @returns {Object} If successful, will return success message and array of messages in conversation.
+ * @returns {Object} If successful, will return message.
  */
 router.post('/', async (req, res) => {
     let conversation
@@ -107,8 +109,8 @@ router.post('/', async (req, res) => {
         }
 
         res.send({
-            message: 'Message sent.',
-            chat: messages
+            user: req.body.user.user.username,
+            message: req.body.body
         })
     } else if (conversation.status === 500) {
         res.status(500).send({
@@ -153,30 +155,37 @@ async function getConversationId(usernameA, usernameB) {
     }
 
     if (userA && userB) { // If both users exist
-        let conversation
-        try {
-            conversation = await chatDb.getConversation(userA.id, userB.id)
-        } catch (e) {
+        if (userA.id == userB.id) {
             return {
-                status: 500,
-                message: "Error getting conversation (chatDB.getConversation)",
-                error: e
+                status: 400,
+                message: "You cannot create a conversation with yourself."
             }
-        }
-
-        if (!conversation[0]) { // If conversation doesn't exist, create a new one.
+        } else {
+            let conversation
             try {
-                conversation = await chatDb.createConversation(userA.id, userB.id)
+                conversation = await chatDb.getConversation(userA.id, userB.id)
             } catch (e) {
                 return {
                     status: 500,
-                    message: "Error creating conversation (chatDB.createConversation)",
+                    message: "Error getting conversation (chatDB.getConversation)",
                     error: e
                 }
             }
-        } else {
-            conversation[0]["currentUser"] = userA.id
-            return conversation[0]
+
+            if (!conversation[0]) { // If conversation doesn't exist, create a new one.
+                try {
+                    conversation = await chatDb.createConversation(userA.id, userB.id)
+                } catch (e) {
+                    return {
+                        status: 500,
+                        message: "Error creating conversation (chatDB.createConversation)",
+                        error: e
+                    }
+                }
+            } else {
+                conversation[0]["currentUser"] = userA.id
+                return conversation[0]
+            }
         }
     } else {
         return {

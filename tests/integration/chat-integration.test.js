@@ -11,7 +11,7 @@ describe('[POST]', () => {
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                username: "user",
+                username: "user1",
                 body: "hey bestie <3"
             })
             .expect(200)
@@ -45,7 +45,7 @@ describe('[POST]', () => {
 describe('[GET]', () => {
     it('GET[/chat/:username] conversation found and jwt valid, should return 200', async () => {
         await request(app)
-            .get('/chat/user')
+            .get('/chat/user1')
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .expect(200)
