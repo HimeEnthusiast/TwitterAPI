@@ -8,8 +8,14 @@ const pool = mysql.createPool({
     port: process.env.DB_PORT
 })
 
+/** @module UserQueries */
 let twitterDB = {}
 
+/**
+ * getAllUsers
+ * @description - Gets all users in database.
+ * @returns {Promise} - Resolve sql response or reject with error message.
+ */
 twitterDB.getAllUsers = () => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM user', (err, results) => {
@@ -21,6 +27,12 @@ twitterDB.getAllUsers = () => {
     })
 }
 
+/**
+ * getOneUserById
+ * @description - Searches for one user based on user id.
+ * @param {Number} id 
+ * @returns {Promise} - Resolve sql response or reject with error message.
+ */
 twitterDB.getOneUserById = (id) => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM user WHERE id = ?', [id], (err, results) => {
@@ -32,6 +44,12 @@ twitterDB.getOneUserById = (id) => {
     })
 }
 
+/**
+ * getOneUserByUsername
+ * @description - Searches for one user based on user name.
+ * @param {String} username 
+ * @returns {Promise} - Resolve sql response or reject with error message.
+ */
 twitterDB.getOneUserByUsername = (username) => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM user WHERE username = ?', [username.toLowerCase()], (err, results) => {
@@ -43,6 +61,13 @@ twitterDB.getOneUserByUsername = (username) => {
     })
 }
 
+/**
+ * insertOneUser
+ * @description - Creates a new user account with username and password.
+ * @param {String} username 
+ * @param {String} password 
+ * @returns {Promise} - Resolve sql response or reject with error message.
+ */
 twitterDB.insertOneUser = (username, password) => {
     return new Promise((resolve, reject) => {
         pool.query('INSERT INTO user (username, password) VALUES (?, ?)', [username.toLowerCase(), password], (err, results) => {

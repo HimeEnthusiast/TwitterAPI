@@ -1,9 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: api/chat.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: api/chat.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/** @module Chat */
 const express = require('express')
 const router = express.Router()
 const chatDb = require('../database/chatQueries')
 const userDb = require('../database/userQueries')
 
-
+/**
+ * @function
+ * @name GET /chat/:username
+ * @description Gets conversation between current logged in user and specified user
+ * @param {String} username - Recipient user
+ * @returns {Object} If successful, will return success message and array of messages in conversation.
+ */
 router.get('/:username', async (req, res) => {
     let conversationId
     let conversation
@@ -17,7 +52,7 @@ router.get('/:username', async (req, res) => {
         })
     }
 
-    if (!('status' in conversationId)) {
+    if (!('status' in conversationId)) { // If conversationId object doesn't return a status code
         try {
             conversation = await getConversationMessages(conversationId.id)
         } catch (e) {
@@ -45,7 +80,14 @@ router.get('/:username', async (req, res) => {
     }
 })
 
-// send message
+/**
+ * @function
+ * @name POST /chat/
+ * @description Gets conversation between current logged in user and specified user
+ * @param {String} username - Recipient user
+ * @param {String} body - Message body
+ * @returns {Object} If successful, will return success message and array of messages in conversation.
+ */
 router.post('/', async (req, res) => {
     let conversation
     let messages
@@ -98,6 +140,14 @@ router.post('/', async (req, res) => {
     }
 })
 
+/**
+ * @function
+ * getConversationId
+ * @description Gets a conversation object for users specified from the database.
+ * @param {String} usernameA 
+ * @param {String} usernameB 
+ * @returns {Object} Returns a conversation object from the database or return an error object with status code.
+ */
 async function getConversationId(usernameA, usernameB) {
     let userA
     let userB
@@ -107,25 +157,23 @@ async function getConversationId(usernameA, usernameB) {
     } catch (e) {
         return {
             status: 500,
-            message: "Error getting User",
+            message: "Error getting User (userA)",
             error: e
         }
     }
 
     try {
         userB = await userDb.getOneUserByUsername(usernameB)
-
     } catch (e) {
         return {
             status: 500,
-            message: "Error getting user",
+            message: "Error getting user (userB)",
             error: e
         }
     }
 
-    if (userA && userB) {
+    if (userA &amp;&amp; userB) { // If both users exist
         let conversation
-
         try {
             conversation = await chatDb.getConversation(userA.id, userB.id)
         } catch (e) {
@@ -136,7 +184,7 @@ async function getConversationId(usernameA, usernameB) {
             }
         }
 
-        if (!conversation[0]) {
+        if (!conversation[0]) { // If conversation doesn't exist, create a new one.
             try {
                 conversation = await chatDb.createConversation(userA.id, userB.id)
             } catch (e) {
@@ -153,11 +201,18 @@ async function getConversationId(usernameA, usernameB) {
     } else {
         return {
             status: 404,
-            message: "Conversation could not be found(getConversationId)"
+            message: "Conversation could not be found (getConversationId)"
         }
     }
 }
 
+/**
+ * @function
+ * getConversationMessages
+ * @description Gets all messages that belong to a conversation.
+ * @param {Number} conversationId 
+ * @returns {Array} Returns array of messages or error object.
+ */
 async function getConversationMessages(conversationId) {
     let messages
 
@@ -185,4 +240,26 @@ module.exports = {
     router: router,
     getConversationId: getConversationId,
     getConversationMessages: getConversationMessages
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Chat.html">Chat</a></li><li><a href="module-ChatQueries.html">ChatQueries</a></li><li><a href="module-Jwt.html">Jwt</a></li><li><a href="module-jwtVerificationMiddleware.html">jwtVerificationMiddleware</a></li><li><a href="module-TweetQueries.html">TweetQueries</a></li><li><a href="module-Tweets.html">Tweets</a></li><li><a href="module-UserQueries.html">UserQueries</a></li><li><a href="module-Users.html">Users</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Apr 28 2021 16:18:51 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 const app = require('../../main')
-const userQueries = require('../../database/userQueries')
+const userQueries = require('../../src/database/userQueries')
 const request = require('supertest')
 const randomstr = require('randomstring')
 

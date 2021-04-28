@@ -1,9 +1,16 @@
+/** @module Users */
 const express = require('express')
 const router = express.Router()
 const db = require('../database/userQueries')
 
 
-// Register new account
+/**
+ * @function
+ * @name POST /users/
+ * @description Registers a new user in the database.
+ * @param {String} username
+ * @param {String} password
+ */
 router.post('/', async (req, res) => {
     let user
 

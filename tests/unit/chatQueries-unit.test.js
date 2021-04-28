@@ -1,6 +1,6 @@
 const app = require('../../main')
 const request = require('supertest')
-const chatQueries = require('../../database/chatQueries')
+const chatQueries = require('../../src/database/chatQueries')
 
 
 describe('[getConversation]', () => {

@@ -1,6 +1,6 @@
 const express = require('express')
 const env = require('dotenv').config()
-const jwtVerificationMiddleware = require('./middleware/jwtVerification')
+const jwtVerificationMiddleware = require('./src/middleware/jwtVerification')
 const app = express()
 const port = 3000
 
@@ -9,12 +9,12 @@ app.use(function(req, res, next) { // JWT Auth
   jwtVerificationMiddleware(req, res, next)
 });
 
-let chat = require('./api/chat')
-let tweet = require('./api/tweet')
+let chat = require('./src/api/chat')
+let tweet = require('./src/api/tweet')
 
 // Routers
-app.use('/users', require('./api/users'))
-app.use('/jwt', require('./api/jwt'))
+app.use('/users', require('./src/api/users'))
+app.use('/jwt', require('./src/api/jwt'))
 app.use('/tweet', tweet.router)
 app.use('/chat', chat.router)
 

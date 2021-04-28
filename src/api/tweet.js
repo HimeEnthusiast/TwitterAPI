@@ -1,10 +1,16 @@
+/** @module Tweets */
 const express = require('express')
 const router = express.Router()
 const tweetDb = require('../database/tweetQueries')
 const userDb = require('../database/userQueries')
 
 
-// get all tweets
+/**
+ * @function
+ * @name GET /tweet/
+ * @description Gets all tweets in table.
+ * @returns {Object} If successful, will return array of tweets.
+ */
 router.get('/', async (req, res) => {
     try {
         let tweets = await tweetDb.getAllTweets()
@@ -17,7 +23,13 @@ router.get('/', async (req, res) => {
     }
 })
 
-// get one tweet by id
+/**
+ * @function
+ * @name GET /tweet/:id
+ * @description Gets 1 tweet by tweet id.
+ * @param {Number} id - Tweet id
+ * @returns {Object} If successful, will return tweet.
+ */
 router.get('/:id', async (req, res) => {
     let tweet
 
@@ -37,7 +49,13 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-//get all tweets by user id
+/**
+ * @function
+ * @name GET /tweet/user/:id
+ * @description Gets all tweets and retweets by a user.
+ * @param {Number} id - User id
+ * @returns {Object} If successful, will return array of tweets.
+ */
 router.get('/user/:id', async (req, res) => {
     let tweets
 
@@ -57,12 +75,18 @@ router.get('/user/:id', async (req, res) => {
     }
 })
 
-// Post a tweet
+/**
+ * @function
+ * @name POST /tweet/
+ * @description Posts a tweet.
+ * @param {String} body - Tweet body
+ * @returns {Object} If successful, will success message and tweet body.
+ */
 router.post('/', async (req, res) => {
     let user
     let tweet
 
-    if (req.body.body.length < 280) {
+    if (req.body.body.length <= 280) { //Tweet must meet character limit
         try {
             user = await userDb.getOneUserByUsername(req.body.user.user.username)
         } catch (e) {
@@ -101,7 +125,14 @@ router.post('/', async (req, res) => {
     }
 })
 
-// Edit tweet
+/**
+ * @function
+ * @name PUT /tweet/
+ * @description Updates specified tweet.
+ * @param {Number} id - Tweet id
+ * @param {String} body - Tweet body
+ * @returns {Object} If successful, will return success message and tweet body.
+ */
 router.put('/', async (req, res) => {
     let tweet
     let user
@@ -124,9 +155,9 @@ router.put('/', async (req, res) => {
         })
     }
 
-    if (tweet) {
-        if (tweet.userID === user.id) {
-            if (req.body.body.length < 280) {
+    if (tweet) { // If tweet exists
+        if (tweet.userID === user.id) { //Current user has to match user id of tweet being edited
+            if (req.body.body.length <= 280) { // Tweet must meet character limit
                 tweetDb.updateTweet(req.body.body, tweet.id)
                 res.send({
                     message: "Tweet updated.",
@@ -145,7 +176,13 @@ router.put('/', async (req, res) => {
     }
 })
 
-// Delete tweet
+/**
+ * @function
+ * @name DELETE /tweet/
+ * @description Deletes specified tweet
+ * @param {Number} id - Tweet id
+ * @returns {Object} If successful, will return success message.
+ */
 router.delete('/', async (req, res) => {
     let user
     let tweet
@@ -168,8 +205,8 @@ router.delete('/', async (req, res) => {
         })
     }
 
-    if (tweet) {
-        if (tweet.userID === user.id) {
+    if (tweet) { // If tweet exists.
+        if (tweet.userID === user.id) { // Current user id must match user id of tweet being deleted.
             tweetDb.deleteTweet(tweet.id)
             tweetDb.deleteUserTweet(user.id, tweet.id)
             res.send({ message: "Tweet deleted." })
@@ -181,6 +218,13 @@ router.delete('/', async (req, res) => {
     }
 })
 
+/**
+ * @function
+ * @name POST /tweet/like
+ * @description Likes specified tweet
+ * @param {Number} id - Tweet id
+ * @returns {Object} If successful, will return success message.
+ */
 router.post('/like', async (req, res) => {
     let user
     let userLikes
@@ -196,7 +240,7 @@ router.post('/like', async (req, res) => {
         })
     }
 
-    if (tweet) {
+    if (tweet) { // If tweet exists
         try {
             user = await userDb.getOneUserByUsername(req.body.user.user.username)
         } catch (e) {
@@ -215,7 +259,8 @@ router.post('/like', async (req, res) => {
             })
         }
 
-
+        // If there are likes, search likes for current tweet
+        // If tweet is found, isLiked = true and the loop is broken
         if (userLikes) {
             for (i = 0; i < userLikes.length; i++) {
                 if (userLikes[i].tweetID === req.body.id) {
@@ -225,13 +270,45 @@ router.post('/like', async (req, res) => {
             }
         }
 
-        if (isLiked) {
-            tweetDb.likeTweet(req.body.id, true)
-            tweetDb.deleteLike(user.id, req.body.id)
+        if (isLiked) { // Unlike tweet if already liked
+            try {
+                tweetDb.likeTweet(req.body.id, true)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error changing tweet likes.",
+                    error: e
+                })
+            }
+
+            try {
+                tweetDb.deleteLike(user.id, req.body.id)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error removing like from table.",
+                    error: e
+                })
+            }
+
             res.send({ message: "Unliked tweet." })
-        } else {
-            tweetDb.likeTweet(req.body.id, false)
-            tweetDb.saveLike(user.id, req.body.id)
+        } else { // Like tweet if not already liked
+            try {
+                tweetDb.likeTweet(req.body.id, false)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error changing tweet likes.",
+                    error: e
+                })
+            }
+
+            try {
+                tweetDb.saveLike(user.id, req.body.id)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error adding like to table.",
+                    error: e
+                })
+            }
+
             res.send({ message: "Liked tweet." })
         }
     } else {
@@ -239,6 +316,13 @@ router.post('/like', async (req, res) => {
     }
 })
 
+/**
+ * @function
+ * @name POST /tweet/retweet
+ * @description Retweets specified tweet
+ * @param {Number} id - Tweet id
+ * @returns {Object} If successful, will return success message.
+ */
 router.post('/retweet', async (req, res) => {
     let user
     let userTweets
@@ -254,7 +338,7 @@ router.post('/retweet', async (req, res) => {
         })
     }
 
-    if (tweet) {
+    if (tweet) { // If tweet exists
         try {
             user = await userDb.getOneUserByUsername(req.body.user.user.username)
         } catch (e) {
@@ -273,6 +357,8 @@ router.post('/retweet', async (req, res) => {
             })
         }
 
+        // User has tweets, find retweet
+        // If found, isRetweeted = true and loop is broken
         if (userTweets) {
             for (i = 0; i < userTweets.length; i++) {
                 if (userTweets[i].tweetID === req.body.id) {
@@ -283,12 +369,44 @@ router.post('/retweet', async (req, res) => {
         }
 
         if (isRetweeted) {
-            tweetDb.deleteUserTweet(user.id, req.body.id)
-            tweetDb.retweet(req.body.id, true)
+            try {
+                tweetDb.deleteUserTweet(user.id, req.body.id)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error removing retweet from table.",
+                    error: e
+                })
+            }
+
+            try {
+                tweetDb.retweet(req.body.id, true)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error changing retweets number.",
+                    error: e
+                })
+            }
+
             res.send({ message: "Un-Retweeted tweet." })
         } else {
-            tweetDb.saveUserTweet(user.id, req.body.id)
-            tweetDb.retweet(req.body.id, false)
+            try {
+                tweetDb.saveUserTweet(user.id, req.body.id)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error saving retweet.",
+                    error: e
+                })
+            }
+
+            try {
+                tweetDb.retweet(req.body.id, false)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error changing retweets number.",
+                    error: e
+                })
+            }
+
             res.send({ message: "Retweeted tweet." })
         }
     } else {
@@ -296,6 +414,14 @@ router.post('/retweet', async (req, res) => {
     }
 })
 
+/**
+ * @function
+ * @name POST /tweet/reply
+ * @description Replys to specified tweet
+ * @param {Number} parentTweetId - Tweet that is being replied to
+ * @param {String} body - Tweet body
+ * @returns {Object} If successful, will return thread of tweets.
+ */
 router.post('/reply', async (req, res) => {
     let user
     let tweet
@@ -320,8 +446,8 @@ router.post('/reply', async (req, res) => {
         })
     }
 
-    if (tweet) {
-        if (req.body.body.length < 280) {
+    if (tweet) { // If parent tweet exists
+        if (req.body.body.length <= 280) { // Body must be under character limit
             try {
                 reply = await tweetDb.postTweet(req.body.body, user.id)
             } catch (e) {
@@ -350,7 +476,7 @@ router.post('/reply', async (req, res) => {
                 })
             }
 
-            if (!('status' in thread)) {
+            if (!('status' in thread)) { // If the thread does not return an error status
                 res.send(thread)
             } else if (thread.status === 500) {
                 res.status(500).send({
@@ -374,6 +500,13 @@ router.post('/reply', async (req, res) => {
     }
 })
 
+/**
+ * @function
+ * threadTweets
+ * @description Creates a thread based on id of top tweet
+ * @param {Number} parentTweetId - Top tweet of thread
+ * @returns {Object} If successful, will return thread of tweets.
+ */
 async function threadTweets(parentTweetId) {
     let parentTweet
     let replyResults
@@ -390,7 +523,7 @@ async function threadTweets(parentTweetId) {
         }
     }
 
-    if (parentTweet) {
+    if (parentTweet) { // If parent tweet exists
         try {
             replyResults = await tweetDb.getReplies(parentTweet.id)
         } catch (e) {
@@ -407,9 +540,11 @@ async function threadTweets(parentTweetId) {
         }
     }
 
-    thread.topTweet = parentTweet
+    // Set parent tweet as top of thread
+    thread.topTweet = parentTweet 
 
-    if (replyResults) {
+    if (replyResults) { // If tweet has replies
+        // Get replies of replies
         for (i = 0; i < replyResults.length; i++) {
             let subReplyResults
 

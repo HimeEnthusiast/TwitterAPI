@@ -1,8 +1,17 @@
+/** @module Jwt */
 const express = require('express')
 const router = express.Router()
 const jwt = require('jsonwebtoken')
 const db = require('../database/userQueries')
 
+/**
+ * @function
+ * @name POST /jwt/
+ * @description Performs user login by determining if credentials exist and are valid.
+ * @param {String} username
+ * @param {String} password
+ * @returns {String} Returns JWT token.
+ */
 router.post('/login', async (req, res) => {
     let userResult
     const user = {

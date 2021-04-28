@@ -1,6 +1,6 @@
 const app = require('../../main')
 const request = require('supertest')
-const tweetQueries = require('../../database/tweetQueries')
+const tweetQueries = require('../../src/database/tweetQueries')
 const randomstr = require('randomstring')
 
 
@@ -103,7 +103,7 @@ describe('[deleteUserTweet]', () => {
 
 describe('[getUserTweets]', () => {
     it('[getUserTweets] userID found, should return array of tweetIDs', async () => {
-        let result = await tweetQueries.getUserTweets(2)
+        let result = await tweetQueries.getUserTweets(1)
         expect(result[0]).toBeTruthy()
     })
 
@@ -116,7 +116,7 @@ describe('[getUserTweets]', () => {
 
 describe('[getUserTweetsWithRetweets]', () => {
     it('[getUserTweetsWithRetweets] userID found, should return array of tweets] ', async () => {
-        let result = await tweetQueries.getUserTweetsWithRetweets(2)
+        let result = await tweetQueries.getUserTweetsWithRetweets(1)
         expect(result[0]).toBeTruthy()
     })
 
@@ -170,7 +170,7 @@ describe('[reply]', () => {
 
 describe('[getReplies]', () => {
     it('[getRepies] tweet id found, should return array of tweets', async () => {
-        let result = await tweetQueries.getReplies(6)
+        let result = await tweetQueries.getReplies(1)
         expect(result[0]).toBeTruthy()
     })
 

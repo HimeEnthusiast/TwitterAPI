@@ -1,6 +1,6 @@
 const app = require('../../main')
-const tweet = require('../../api/tweet')
-const tweetQueries = require('../../database/tweetQueries')
+const tweet = require('../../src/api/tweet')
+const tweetQueries = require('../../src/database/tweetQueries')
 const request = require('supertest')
 const randromstr = require('randomstring')
 
@@ -48,7 +48,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk1NzQxMjF9.xN5VNs8ZQeKJYjqhT5z09C-sebialkVSVeWk0ieBT5U')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 body: randromstr.generate(50)
             })
@@ -59,7 +59,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbG//////ciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', 'gfdgdfgdfg')
             .send({
                 body: randromstr.generate(50)
             })
@@ -70,7 +70,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 username: 'user',
                 body: randromstr.generate(300)
@@ -82,7 +82,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/like')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 1
             })
@@ -93,7 +93,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/like')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 453454353345
             })
@@ -105,7 +105,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/retweet')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 1
             })
@@ -116,7 +116,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/retweet')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 65656554645464
             })
@@ -128,7 +128,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/reply')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 parentTweetId: 1,
                 body: randromstr.generate(50)
@@ -140,7 +140,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/reply')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 parentTweetId: 1,
                 body: randromstr.generate(300)
@@ -152,7 +152,7 @@ describe('[POST]', () => {
         await request(app)
             .post('/tweet/reply')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 parentTweetId: 43654365,
                 body: randromstr.generate(50)
@@ -166,7 +166,7 @@ describe('[PUT]', () => {
         await request(app)
             .put('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk1ODM3NzZ9.nwYhCKxrJAjOohXH_lmh4quICr7Wd_CdypbQa-oaG68')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 1,
                 body: randromstr.generate(50)
@@ -178,9 +178,9 @@ describe('[PUT]', () => {
         await request(app)
             .put('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                id: 6,
+                id: 2,
                 body: randromstr.generate(50)
             })
             .expect(403)
@@ -190,12 +190,12 @@ describe('[PUT]', () => {
         await request(app)
             .put('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                id: 6,
+                id: 1,
                 body: randromstr.generate(300)
             })
-            .expect(403)
+            .expect(400)
     })
 })
 
@@ -206,7 +206,7 @@ describe('[DELETE]', () => {
         await request(app)
             .delete('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: row.id
             })
@@ -217,7 +217,7 @@ describe('[DELETE]', () => {
         await request(app)
             .delete('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
                 id: 6546546546465
             })
@@ -228,9 +228,9 @@ describe('[DELETE]', () => {
         await request(app)
             .delete('/tweet/')
             .set('Content-Type', 'application/json')
-            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                id: 6
+                id: 2
             })
             .expect(403)
     })
