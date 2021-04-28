@@ -28,4 +28,8 @@ The application is now ready to run!
 npm run dev
 npm test
 ```
+
 npm run dev will run the program in watch mode. You will need to press ctrl+c to exit. npm test will run all tests.
+In the event that you run into jwt errors while testing, you will need to change the TESTING_TOKEN in the .env
+
+I have also provided a file you can import into post man with all of the routes and sample data to get you started.
