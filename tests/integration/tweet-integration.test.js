@@ -1,5 +1,6 @@
 const app = require('../../main')
 const tweet = require('../../api/tweet')
+const tweetQueries = require('../../database/tweetQueries')
 const request = require('supertest')
 const randromstr = require('randomstring')
 
@@ -49,7 +50,6 @@ describe('[POST]', () => {
             .set('Content-Type', 'application/json')
             .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk1NzQxMjF9.xN5VNs8ZQeKJYjqhT5z09C-sebialkVSVeWk0ieBT5U')
             .send({
-                username: 'user',
                 body: randromstr.generate(50)
             })
             .expect(200)
@@ -61,7 +61,6 @@ describe('[POST]', () => {
             .set('Content-Type', 'application/json')
             .set('Authorization', 'bearer eyJhbG//////ciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
             .send({
-                username: 'user',
                 body: randromstr.generate(50)
             })
             .expect(401)
@@ -101,7 +100,7 @@ describe('[POST]', () => {
             .expect(404)
     })
 
-    
+
     it('POST[/tweet/retweet] tweet is found, is retweeted/unretweeted, should return 200', async () => {
         await request(app)
             .post('/tweet/retweet')
@@ -123,16 +122,128 @@ describe('[POST]', () => {
             })
             .expect(404)
     })
+
+
+    it('POST[/tweet/reply] tweet id and body is valid, should return 200', async () => {
+        await request(app)
+            .post('/tweet/reply')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                parentTweetId: 1,
+                body: randromstr.generate(50)
+            })
+            .expect(200)
+    })
+
+    it('POST[/tweet/reply] reply over character limit, should return 400', async () => {
+        await request(app)
+            .post('/tweet/reply')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                parentTweetId: 1,
+                body: randromstr.generate(300)
+            })
+            .expect(400)
+    })
+
+    it('POST[/tweet/reply] parent id not found, should return 404', async () => {
+        await request(app)
+            .post('/tweet/reply')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                parentTweetId: 43654365,
+                body: randromstr.generate(50)
+            })
+            .expect(404)
+    })
 })
 
 describe('[PUT]', () => {
-    
+    it('PUT[/tweet/] jwt and tweet id dont match, should return 403', async () => {
+        await request(app)
+            .put('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk1ODM3NzZ9.nwYhCKxrJAjOohXH_lmh4quICr7Wd_CdypbQa-oaG68')
+            .send({
+                id: 1,
+                body: randromstr.generate(50)
+            })
+            .expect(200)
+    })
+
+    it('PUT[/tweet/] jwt and tweet id dont match, should return 403', async () => {
+        await request(app)
+            .put('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                id: 6,
+                body: randromstr.generate(50)
+            })
+            .expect(403)
+    })
+
+    it('PUT[/tweet/] characters over limit, should return 400', async () => {
+        await request(app)
+            .put('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                id: 6,
+                body: randromstr.generate(300)
+            })
+            .expect(403)
+    })
 })
 
 describe('[DELETE]', () => {
-    
+    it('DELETE[/tweet/] row matches user, is deleted', async () => {
+        let row = await tweetQueries.getLastTweetIdTest()
+
+        await request(app)
+            .delete('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                id: row.id
+            })
+            .expect(200)
+    })
+
+    it('DELETE[/tweet/] tweet does not exist, should return 404', async () => {
+        await request(app)
+            .delete('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                id: 6546546546465
+            })
+            .expect(404)
+    })
+
+    it('DELETE[/tweet/] tweet does not belong to user, should return 403', async () => {
+        await request(app)
+            .delete('/tweet/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidXNlciIsInBhc3N3b3JkIjoicGFzcyJ9LCJpYXQiOjE2MTk0ODY3ODl9.koExWUewJCU3R39rGG9aGloiVFxREKq0gMPVI6rlSIc')
+            .send({
+                id: 6
+            })
+            .expect(403)
+    })
 })
 
 describe('[threadTweets]', () => {
-    
+    it('[threadTweets]', async () => {
+        let result = await tweet.threadTweets(1)
+        expect(result instanceof Object).toBeTruthy()
+    })
+
+    it('[threadTweets]', async () => {
+        let result = await tweet.threadTweets(54354354)
+        expect(result instanceof Object).toBeTruthy()
+    })
 })

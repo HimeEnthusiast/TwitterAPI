@@ -164,7 +164,7 @@ twitterDB.deleteLike = (userId, tweetId) => {//delete from userlikes where useri
     })
 }
 
-twitterDB.getLastTweetIdTest = () => { //testhing method
+twitterDB.getLastTweetIdTest = () => { //testing method
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM tweet ORDER BY ID DESC LIMIT 1', (err, results) => {
             if (err) {

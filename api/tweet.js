@@ -60,58 +60,44 @@ router.get('/user/:id', async (req, res) => {
 // Post a tweet
 router.post('/', async (req, res) => {
     let user
-    let requestUser
     let tweet
 
-    try {
-        user = await userDb.getOneUserByUsername(req.body.user.user.username)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting user",
-            error: e
-        })
-    }
-
-    try {
-        requestUser = await userDb.getOneUserByUsername(req.body.username)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting user",
-            error: e
-        })
-    }
-
-    if (user.id === requestUser.id) {
-        if (req.body.body.length < 280) {
-            try {
-                tweet = await tweetDb.postTweet(req.body.body, user.id)
-            } catch (e) {
-                res.status(500).send({
-                    message: "Error posting tweet",
-                    error: e
-                })
-            }
-
-            try {
-                tweetDb.saveUserTweet(user.id, tweet.insertId)
-            } catch (e) {
-                res.status(500).send({
-                    message: "Error saving tweet to user",
-                    error: e
-                })
-            }
-
-            res.send({
-                message: 'Tweet posted.',
-                tweet: req.body.body
-            })
-        } else {
-            res.status(400).send({
-                message: "Tweet over character limit (280)",
+    if (req.body.body.length < 280) {
+        try {
+            user = await userDb.getOneUserByUsername(req.body.user.user.username)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting user",
+                error: e
             })
         }
+
+        try {
+            tweet = await tweetDb.postTweet(req.body.body, user.id)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error posting tweet",
+                error: e
+            })
+        }
+
+        try {
+            tweetDb.saveUserTweet(user.id, tweet.insertId)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error saving tweet to user",
+                error: e
+            })
+        }
+
+        res.send({
+            message: 'Tweet posted.',
+            tweet: req.body.body
+        })
     } else {
-        res.status(401).send({ message: "You are not allowed to post to this account." })
+        res.status(400).send({
+            message: "Tweet over character limit (280)",
+        })
     }
 })
 
@@ -121,7 +107,7 @@ router.put('/', async (req, res) => {
     let user
 
     try {
-        user = userDb.getOneUserByUsername(req.body.user.user.username)
+        user = await userDb.getOneUserByUsername(req.body.user.user.username)
     } catch (e) {
         res.status(500).send({
             message: "Error getting user",
@@ -140,11 +126,17 @@ router.put('/', async (req, res) => {
 
     if (tweet) {
         if (tweet.userID === user.id) {
-            tweetDb.updateTweet(req.body.body, tweet.id)
-            res.send({
-                message: "Tweet updated.",
-                body: req.body.body
-            })
+            if (req.body.body.length < 280) {
+                tweetDb.updateTweet(req.body.body, tweet.id)
+                res.send({
+                    message: "Tweet updated.",
+                    body: req.body.body
+                })
+            } else {
+                res.status(400).send({
+                    message: "Tweet over character limit (280)",
+                })
+            }
         } else {
             res.status(403).send({ message: "Forbidden." })
         }
@@ -177,9 +169,9 @@ router.delete('/', async (req, res) => {
     }
 
     if (tweet) {
-        if (tweet.userID === user[0].id) {
+        if (tweet.userID === user.id) {
             tweetDb.deleteTweet(tweet.id)
-            tweetDb.deleteUserTweet(user[0].id, tweet.id)
+            tweetDb.deleteUserTweet(user.id, tweet.id)
             res.send({ message: "Tweet deleted." })
         } else {
             res.status(403).send({ message: "Forbidden." })
@@ -197,7 +189,6 @@ router.post('/like', async (req, res) => {
 
     try {
         tweet = await tweetDb.getOneTweet(req.body.id)
-        console.log(tweet)
     } catch (e) {
         res.status(500).send({
             message: "Error getting tweet",
@@ -307,11 +298,12 @@ router.post('/retweet', async (req, res) => {
 
 router.post('/reply', async (req, res) => {
     let user
+    let tweet
     let reply
     let thread
 
     try {
-        user = await userDb.getOneUserByUsername(req.body.username)
+        user = await userDb.getOneUserByUsername(req.body.user.user.username)
     } catch (e) {
         res.status(500).send({
             message: "Error getting user",
@@ -320,41 +312,7 @@ router.post('/reply', async (req, res) => {
     }
 
     try {
-        reply = await tweetDb.postTweet(req.body.body, user[0].id)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error posting tweet",
-            error: e
-        })
-    }
-
-    try {
-        tweetDb.reply(req.body.parentTweetId, reply.insertId)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error posting reply",
-            error: e
-        })
-    }
-
-    try {
-        thread = await threadTweets(req.body.parentTweetId, {}, [])
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting thread",
-            error: e
-        })
-    }
-
-    res.send(thread)
-})
-
-async function threadTweets(parentTweetId, thread, replies) {
-    let parentTweet
-    let replyResults
-
-    try {
-        parentTweet = await tweetDb.getOneTweet(parentTweetId)
+        tweet = await tweetDb.getOneTweet(req.body.parentTweetId)
     } catch (e) {
         res.status(500).send({
             message: "Error getting tweet",
@@ -362,13 +320,91 @@ async function threadTweets(parentTweetId, thread, replies) {
         })
     }
 
-    try {
-        replyResults = await tweetDb.getReplies(parentTweet.id)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting replies",
-            error: e
+    if (tweet) {
+        if (req.body.body.length < 280) {
+            try {
+                reply = await tweetDb.postTweet(req.body.body, user.id)
+            } catch (e) {
+                console.log("ERROR")
+                res.status(500).send({
+                    message: "Error posting tweet",
+                    error: e
+                })
+            }
+
+            try {
+                tweetDb.reply(req.body.parentTweetId, reply.insertId)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error posting reply",
+                    error: e
+                })
+            }
+
+            try {
+                thread = await threadTweets(req.body.parentTweetId)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error getting thread",
+                    error: e
+                })
+            }
+
+            if (!('status' in thread)) {
+                res.send(thread)
+            } else if (thread.status === 500) {
+                res.status(500).send({
+                    message: "Error getting thread",
+                    error: thread.error
+                })
+            } else if (thread.status === 404) {
+                res.status(404).send({
+                    message: "Tweet does not exist"
+                })
+            }
+        } else {
+            res.status(400).send({
+                message: "Tweet over character limit (280)",
+            })
+        }
+    } else {
+        res.status(404).send({
+            message: "Can't reply to tweet that doesn't exist.",
         })
+    }
+})
+
+async function threadTweets(parentTweetId) {
+    let parentTweet
+    let replyResults
+    let thread = {}
+    let replies = []
+
+    try {
+        parentTweet = await tweetDb.getOneTweet(parentTweetId)
+    } catch (e) {
+        return {
+            status: 500,
+            message: "Error getting tweet",
+            error: e
+        }
+    }
+
+    if (parentTweet) {
+        try {
+            replyResults = await tweetDb.getReplies(parentTweet.id)
+        } catch (e) {
+            return {
+                status: 500,
+                message: "Error getting replies",
+                error: e
+            }
+        }
+    } else {
+        return {
+            status: 404,
+            message: "Tweet does not exist"
+        }
     }
 
     thread.topTweet = parentTweet
@@ -380,10 +416,11 @@ async function threadTweets(parentTweetId, thread, replies) {
             try {
                 subReplyResults = await tweetDb.getReplies(replyResults[i].id)
             } catch (e) {
-                res.status(500).send({
+                return {
+                    status: 500,
                     message: "Error getting subreplies",
                     error: e
-                })
+                }
             }
             if (subReplyResults[0]) {
                 replyResults[i].replies = subReplyResults
