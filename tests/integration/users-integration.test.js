@@ -16,7 +16,7 @@ afterEach(async () => {
 
 it('POST[/users/] registration failed user exists, should return 409', async () => {
   await request(app)
-    .post('/users/')
+    .post('/user/')
     .send({
       username: 'user',
       password: 'pass'
@@ -26,7 +26,7 @@ it('POST[/users/] registration failed user exists, should return 409', async () 
 
 it('POST[/users/] registration with new username successful, should return 200', async () => {
   await request(app)
-    .post('/users/')
+    .post('/user/')
     .send({
       username: randomstr.generate(10),
       password: 'pass'

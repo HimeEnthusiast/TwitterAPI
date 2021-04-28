@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
 
         res.send({
             user: req.body.user.user.username,
-            message: req.body.body
+            message: messages[messages.length - 1]
         })
     } else if (conversation.status === 500) {
         res.status(500).send({
