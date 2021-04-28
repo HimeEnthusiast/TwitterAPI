@@ -58,7 +58,7 @@ router.get('/:username', async (req, res) => {
             })
         }
     } else {
-        res.send({})
+        res.send([])
     }
 })
 
@@ -82,6 +82,7 @@ router.post('/', async (req, res) => {
             error: e
         })
     }
+
 
     if (!('status' in conversation)) {
         try {
@@ -115,7 +116,7 @@ router.post('/', async (req, res) => {
     } else if (conversation.status === 500) {
         res.status(500).send({
             message: "Error getting conversation (conversation status 500)",
-            error: e
+            error: conversation.error
         })
     } else if (conversation.status === 404) {
         res.status(404).send('User does not exist.')
@@ -172,7 +173,7 @@ async function getConversationId(usernameA, usernameB) {
                 }
             }
 
-            if (!conversation[0]) { // If conversation doesn't exist, create a new one.
+            if (!conversation) { // If conversation doesn't exist, create a new one.
                 try {
                     conversation = await chatDb.createConversation(userA.id, userB.id)
                 } catch (e) {
@@ -182,9 +183,14 @@ async function getConversationId(usernameA, usernameB) {
                         error: e
                     }
                 }
+
+                console.log(conversation)
+                conversation["currentUser"] = userA.id
+                return conversation
             } else {
-                conversation[0]["currentUser"] = userA.id
-                return conversation[0]
+                console.log(conversation)
+                conversation["currentUser"] = userA.id
+                return conversation
             }
         }
     } else {

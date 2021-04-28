@@ -24,7 +24,7 @@ chatQueries.getConversation = (userAId, userBId) => {
             if (err) {
                 return reject(err)
             }
-            return resolve(results)
+            return resolve(results[0])
         })
     })
 }

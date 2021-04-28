@@ -13,7 +13,7 @@ let chat = require('./src/api/chat')
 let tweet = require('./src/api/tweet')
 
 // Routers
-app.use('/users', require('./src/api/users'))
+app.use('/user', require('./src/api/users'))
 app.use('/jwt', require('./src/api/jwt'))
 app.use('/tweet', tweet.router)
 app.use('/chat', chat.router)

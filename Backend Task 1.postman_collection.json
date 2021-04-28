@@ -9,7 +9,7 @@
 			"name": "users",
 			"item": [
 				{
-					"name": "localhost:3000/api/users",
+					"name": "localhost:3000/api/user",
 					"request": {
 						"method": "POST",
 						"header": [
