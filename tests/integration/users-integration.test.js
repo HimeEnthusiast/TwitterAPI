@@ -2,6 +2,7 @@ const app = require('../../main')
 const request = require('supertest')
 const randomstr = require('randomstring')
 
+
 let server = null;
 
 beforeEach(() => {
@@ -21,7 +22,7 @@ it('POST[/users/] registration failed user exists, should return 409', async () 
       password: 'pass'
     })
     .expect(409)
-});
+})
 
 it('POST[/users/] registration with new username successful, should return 200', async () => {
   await request(app)
@@ -31,4 +32,4 @@ it('POST[/users/] registration with new username successful, should return 200',
       password: 'pass'
     })
     .expect(200)
-});
+})

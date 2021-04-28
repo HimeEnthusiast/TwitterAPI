@@ -164,6 +164,17 @@ twitterDB.deleteLike = (userId, tweetId) => {//delete from userlikes where useri
     })
 }
 
+twitterDB.getLastTweetIdTest = () => { //testhing method
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM tweet ORDER BY ID DESC LIMIT 1', (err, results) => {
+            if (err) {
+                return reject(err)
+            }
+            return resolve(results[0])
+        })
+    })
+}
+
 twitterDB.reply = (tweetId, replyId) => {
     return new Promise((resolve, reject) => {
         pool.query('INSERT INTO tweet_replies VALUES (?, ?)', [tweetId, replyId], (err, results) => {

@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
         })
     }
 
-    if (result) {
+    if (tweet) {
         res.send(tweet)
     } else {
         res.status(404).send({ message: "Tweet does not exist." })
@@ -60,6 +60,7 @@ router.get('/user/:id', async (req, res) => {
 // Post a tweet
 router.post('/', async (req, res) => {
     let user
+    let requestUser
     let tweet
 
     try {
@@ -72,27 +73,46 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        tweet = await tweetDb.postTweet(req.body.body, user[0].id)
+        requestUser = await userDb.getOneUserByUsername(req.body.username)
     } catch (e) {
         res.status(500).send({
-            message: "Error posting tweet",
+            message: "Error getting user",
             error: e
         })
     }
 
-    try {
-        tweetDb.saveUserTweet(user[0].id, tweet.insertId)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error saving tweet to user",
-            error: e
-        })
-    }
+    if (user.id === requestUser.id) {
+        if (req.body.body.length < 280) {
+            try {
+                tweet = await tweetDb.postTweet(req.body.body, user.id)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error posting tweet",
+                    error: e
+                })
+            }
 
-    res.send({
-        message: 'Tweet posted.',
-        tweet: req.body.body
-    })
+            try {
+                tweetDb.saveUserTweet(user.id, tweet.insertId)
+            } catch (e) {
+                res.status(500).send({
+                    message: "Error saving tweet to user",
+                    error: e
+                })
+            }
+
+            res.send({
+                message: 'Tweet posted.',
+                tweet: req.body.body
+            })
+        } else {
+            res.status(400).send({
+                message: "Tweet over character limit (280)",
+            })
+        }
+    } else {
+        res.status(401).send({ message: "You are not allowed to post to this account." })
+    }
 })
 
 // Edit tweet
@@ -172,87 +192,116 @@ router.delete('/', async (req, res) => {
 router.post('/like', async (req, res) => {
     let user
     let userLikes
+    let tweet
     let isLiked = false
 
     try {
-        user = await userDb.getOneUserByUsername(req.body.user.user.username)
+        tweet = await tweetDb.getOneTweet(req.body.id)
+        console.log(tweet)
     } catch (e) {
         res.status(500).send({
-            message: "Error getting user",
+            message: "Error getting tweet",
             error: e
         })
     }
 
-    try {
-        userLikes = await tweetDb.getUserLikes(user[0].id)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting user's likes",
-            error: e
-        })
-    }
+    if (tweet) {
+        try {
+            user = await userDb.getOneUserByUsername(req.body.user.user.username)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting user",
+                error: e
+            })
+        }
+
+        try {
+            userLikes = await tweetDb.getUserLikes(user.id)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting user's likes",
+                error: e
+            })
+        }
 
 
-    if (userLikes) {
-        for (i = 0; i < userLikes.length; i++) {
-            if (userLikes[i].tweetID === req.body.id) {
-                isLiked = true
-                break
+        if (userLikes) {
+            for (i = 0; i < userLikes.length; i++) {
+                if (userLikes[i].tweetID === req.body.id) {
+                    isLiked = true
+                    break
+                }
             }
         }
-    }
 
-    if (isLiked) {
-        tweetDb.likeTweet(req.body.id, true)
-        tweetDb.deleteLike(user[0].id, req.body.id)
-        res.send({ message: "Unliked tweet." })
+        if (isLiked) {
+            tweetDb.likeTweet(req.body.id, true)
+            tweetDb.deleteLike(user.id, req.body.id)
+            res.send({ message: "Unliked tweet." })
+        } else {
+            tweetDb.likeTweet(req.body.id, false)
+            tweetDb.saveLike(user.id, req.body.id)
+            res.send({ message: "Liked tweet." })
+        }
     } else {
-        tweetDb.likeTweet(req.body.id, false)
-        tweetDb.saveLike(user[0].id, req.body.id)
-        res.send({ message: "Liked tweet." })
+        res.status(404).send({ message: "Tweet does not exist" })
     }
 })
 
 router.post('/retweet', async (req, res) => {
     let user
     let userTweets
+    let tweet
     let isRetweeted = false
 
     try {
-        user = await userDb.getOneUserByUsername(req.body.user.user.username)
+        tweet = await tweetDb.getOneTweet(req.body.id)
     } catch (e) {
         res.status(500).send({
-            message: "Error getting user",
+            message: "Error getting tweet",
             error: e
         })
     }
 
-    try {
-        userTweets = await tweetDb.getUserTweets(user[0].id)
-    } catch (e) {
-        res.status(500).send({
-            message: "Error getting user",
-            error: e
-        })
-    }
+    if (tweet) {
+        try {
+            user = await userDb.getOneUserByUsername(req.body.user.user.username)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting user",
+                error: e
+            })
+        }
 
-    if (userTweets) {
-        for (i = 0; i < userTweets.length; i++) {
-            if (userTweets[i].tweetID === req.body.id) {
-                isRetweeted = true
-                break
+        try {
+            userTweets = await tweetDb.getUserTweets(user.id)
+        } catch (e) {
+            res.status(500).send({
+                message: "Error getting user",
+                error: e
+            })
+        }
+
+        if (userTweets) {
+            for (i = 0; i < userTweets.length; i++) {
+                if (userTweets[i].tweetID === req.body.id) {
+                    isRetweeted = true
+                    break
+                }
             }
         }
-    }
 
-    if (isRetweeted) {
-        tweetDb.deleteUserTweet(user[0].id, req.body.id)
-        tweetDb.retweet(req.body.id, true)
-        res.send({ message: "Un-Retweeted tweet." })
+        if (isRetweeted) {
+            tweetDb.deleteUserTweet(user.id, req.body.id)
+            tweetDb.retweet(req.body.id, true)
+            res.send({ message: "Un-Retweeted tweet." })
+        } else {
+            tweetDb.saveUserTweet(user.id, req.body.id)
+            tweetDb.retweet(req.body.id, false)
+            res.send({ message: "Retweeted tweet." })
+        }
     } else {
-        tweetDb.saveUserTweet(user[0].id, req.body.id)
-        tweetDb.retweet(req.body.id, false)
-        res.send({ message: "Retweeted tweet." })
+        res.status(404).send({ message: "Tweet does not exist" })
     }
 })
 
@@ -346,4 +395,7 @@ async function threadTweets(parentTweetId, thread, replies) {
     return thread
 }
 
-module.exports = router
+module.exports = {
+    router: router,
+    threadTweets: threadTweets
+}

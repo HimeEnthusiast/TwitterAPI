@@ -9,11 +9,14 @@ app.use(function(req, res, next) { // JWT Auth
   jwtVerificationMiddleware(req, res, next)
 });
 
+let chat = require('./api/chat')
+let tweet = require('./api/tweet')
+
 // Routers
 app.use('/users', require('./api/users'))
 app.use('/jwt', require('./api/jwt'))
-app.use('/tweet', require('./api/tweet'))
-app.use('/chat', require('./api/chat'))
+app.use('/tweet', tweet.router)
+app.use('/chat', chat.router)
 
 app.get('/', (req, res) => {
   res.send('Hello Twitter!')

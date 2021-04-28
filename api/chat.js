@@ -1,16 +1,15 @@
 const express = require('express')
-const twitterDB = require('../database/chatQueries')
 const router = express.Router()
 const chatDb = require('../database/chatQueries')
 const userDb = require('../database/userQueries')
 
 
-router.get('/', async (req, res) => {
+router.get('/:username', async (req, res) => {
     let conversationId
     let conversation
 
     try {
-        conversationId = await getConversationId(req.body.user.user.username, req.body.username)
+        conversationId = await getConversationId(req.body.user.user.username, req.params.username)
     } catch (e) {
         res.status(500).send({
             message: "Error getting conversation",
@@ -23,19 +22,25 @@ router.get('/', async (req, res) => {
             conversation = await getConversationMessages(conversationId.id)
         } catch (e) {
             res.status(500).send({
-                message: "Error getting messages",
-                error: e
+                message: conversationId.message,
+                error: conversationId.error
             })
         }
-        res.send(conversation)
+
+        res.send({
+            message: "Conversation found",
+            convoMessages: conversation.messages
+        })
     } else if (conversationId.status === 500) {
         res.status(500).send({
-            message: "Error getting conversation.",
+            message: conversationId.message,
             error: conversationId.error
         })
     } else if (conversationId.status === 404) {
         res.status(404).send({
-            message: 'Conversation could not be found'
+            message: conversationId.message,
+            currentUser: req.body.user.user.username,
+            targetUser: req.params.username
         })
     }
 })
@@ -49,7 +54,7 @@ router.post('/', async (req, res) => {
         conversation = await getConversationId(req.body.user.user.username, req.body.username)
     } catch (e) {
         res.status(500).send({
-            message: "Error getting conversation",
+            message: "Error getting conversation (getConversationId)",
             error: e
         })
     }
@@ -85,7 +90,7 @@ router.post('/', async (req, res) => {
         })
     } else if (conversation.status === 500) {
         res.status(500).send({
-            message: "Error getting conversation",
+            message: "Error getting conversation (conversation status 500)",
             error: e
         })
     } else if (conversation.status === 404) {
@@ -109,6 +114,7 @@ async function getConversationId(usernameA, usernameB) {
 
     try {
         userB = await userDb.getOneUserByUsername(usernameB)
+
     } catch (e) {
         return {
             status: 500,
@@ -117,42 +123,44 @@ async function getConversationId(usernameA, usernameB) {
         }
     }
 
-    if (userA[0] && userB[0]) {
+    if (userA && userB) {
         let conversation
+
         try {
-            conversation = await chatDb.getConversation(userA[0].id, userB[0].id)
+            conversation = await chatDb.getConversation(userA.id, userB.id)
         } catch (e) {
             return {
                 status: 500,
-                message: "Error getting conversation",
+                message: "Error getting conversation (chatDB.getConversation)",
                 error: e
             }
         }
 
         if (!conversation[0]) {
             try {
-                conversation = await chatDb.createConversation(userA[0].id, userB[0].id)
+                conversation = await chatDb.createConversation(userA.id, userB.id)
             } catch (e) {
                 return {
                     status: 500,
-                    message: "Error creating conversation",
+                    message: "Error creating conversation (chatDB.createConversation)",
                     error: e
                 }
             }
         } else {
-            conversation[0]["currentUser"] = userA[0].id
+            conversation[0]["currentUser"] = userA.id
             return conversation[0]
         }
     } else {
         return {
             status: 404,
-            message: "Conversation could not be found"
+            message: "Conversation could not be found(getConversationId)"
         }
     }
 }
 
 async function getConversationMessages(conversationId) {
     let messages
+
     try {
         messages = await chatDb.getConversationMessages(conversationId)
     } catch (e) {
@@ -168,9 +176,13 @@ async function getConversationMessages(conversationId) {
     } else {
         return {
             status: 404,
-            message: "Conversation messages could not be found"
+            message: "Conversation messages could not be found (getConversationMessages)"
         }
     }
 }
 
-module.exports = router
+module.exports = {
+    router: router,
+    getConversationId: getConversationId,
+    getConversationMessages: getConversationMessages
+}

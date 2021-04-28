@@ -1,16 +1,8 @@
 const app = require('../../main')
 const request = require('supertest')
-const randomstr = require('randomstring')
 
-// it('should return 401', async () => {
-    
-// })
 
-// it('should return 401', async () => {
-    
-// })
-
-it('should return 200', async () => {
+it('POST[/jwt/login] correct user information sent, should return 200', async () => {
     await request(app)
         .post('/jwt/login')
         .set('Content-Type', 'application/json')
@@ -19,5 +11,26 @@ it('should return 200', async () => {
           password: 'pass'
         })
         .expect(200)
-        
-});
+})
+
+it('POST[/jwt/login] incorrect password sent, should return 401', async () => {
+  await request(app)
+      .post('/jwt/login')
+      .set('Content-Type', 'application/json')
+      .send({
+        username: 'user',
+        password: 'rertrtet'
+      })
+      .expect(401)
+})
+
+it('POST[/jwt/login] incorrect username sent, should return 401', async () => {
+  await request(app)
+      .post('/jwt/login')
+      .set('Content-Type', 'application/json')
+      .send({
+        username: 'tdfterter',
+        password: 'pass'
+      })
+      .expect(401)
+})
