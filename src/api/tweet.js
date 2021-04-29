@@ -68,10 +68,10 @@ router.get('/user/:id', async (req, res) => {
         })
     }
 
-    if (tweets) {
+    if (tweets[0]) {
         res.send(tweets)
     } else {
-        res.status(404).send({ message: "Tweet does not exist." })
+        res.status(404).send({ message: "User does not exist or they have no tweets." })
     }
 })
 
@@ -85,6 +85,13 @@ router.get('/user/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     let user
     let tweet
+
+    if (req.body.body === null || req.body.body.trim() === '') {
+        res.status(400).send({
+            message: "Tweet cannot be empty."
+        })
+        return
+    }
 
     if (req.body.body.length <= 280) { //Tweet must meet character limit
         try {
@@ -427,6 +434,13 @@ router.post('/reply', async (req, res) => {
     let tweet
     let reply
     let thread
+
+    if (req.body.body === null || req.body.body.trim() === '') {
+        res.status(400).send({
+            message: "Tweet cannot be empty."
+        })
+        return
+    }
 
     try {
         user = await userDb.getOneUserByUsername(req.body.user.user.username)

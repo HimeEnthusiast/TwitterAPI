@@ -2,7 +2,7 @@ const express = require('express')
 const env = require('dotenv').config()
 const jwtVerificationMiddleware = require('./src/middleware/jwtVerification')
 const app = express()
-const port = 3000
+const port = process.env.EXPRESS_PORT
 
 app.use(express.json()) // Body parser
 app.use(function(req, res, next) { // JWT Auth

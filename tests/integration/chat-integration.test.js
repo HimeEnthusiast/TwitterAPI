@@ -106,12 +106,12 @@ describe('[getConversationMessages]', () => {
 
 describe('[getConversationId]', () => {
     it('[getConversationId] both users exist with conversation, should return conversation', async () => {
-        let result = await chat.getConversationId('user', 'testuser')
+        let result = await chat.getConversationId('user', 'usergfdgdf')
         expect(result.id).toBeTruthy()
     })
 
-    it('[getConversationId] both users exist with conversation, should return conversation', async () => {
-        let result = await chat.getConversationId('rtretre', 'testuser')
+    it('[getConversationId] not all users exist with conversation, should return 404', async () => {
+        let result = await chat.getConversationId('rtretre', 'usergfdgdf')
         expect(result.status === 404).toBeTruthy()
     })
 })

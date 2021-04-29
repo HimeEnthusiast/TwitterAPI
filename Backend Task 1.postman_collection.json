@@ -6,10 +6,10 @@
 	},
 	"item": [
 		{
-			"name": "user",
+			"name": "users",
 			"item": [
 				{
-					"name": "localhost:3000/api/user",
+					"name": "localhost:3000/api/users",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -35,7 +35,7 @@
 							],
 							"port": "3000",
 							"path": [
-								"users"
+								"user"
 							]
 						}
 					},
@@ -80,7 +80,7 @@
 			"name": "chat",
 			"item": [
 				{
-					"name": "localhost:3000/chat/:username",
+					"name": "localhost:3000/chat?username=user",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -103,14 +103,19 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:3000/chat/user1",
+							"raw": "localhost:3000/chat?username=user1",
 							"host": [
 								"localhost"
 							],
 							"port": "3000",
 							"path": [
-								"chat",
-								"user1"
+								"chat"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "user1"
+								}
 							]
 						}
 					},

@@ -7,7 +7,7 @@ it('POST[/jwt/login] correct user information sent, should return 200', async ()
         .post('/jwt/login')
         .set('Content-Type', 'application/json')
         .send({
-          username: 'user',
+          username: 'usergfdgdf',
           password: 'pass'
         })
         .expect(200)
@@ -18,7 +18,7 @@ it('POST[/jwt/login] incorrect password sent, should return 401', async () => {
       .post('/jwt/login')
       .set('Content-Type', 'application/json')
       .send({
-        username: 'user',
+        username: 'usergfdgdf',
         password: 'rertrtet'
       })
       .expect(401)

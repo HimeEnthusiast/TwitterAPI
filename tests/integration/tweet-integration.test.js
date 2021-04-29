@@ -36,7 +36,7 @@ describe('[GET]', () => {
 
     it('GET[/tweet/:id] user id does not exist, should return 404', async () => {
         await request(app)
-            .get('/tweet/654654645')
+            .get('/tweet/user/654654645')
             .set('Content-Type', 'application/json')
             .expect(404)
     })
@@ -180,7 +180,7 @@ describe('[PUT]', () => {
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                id: 2,
+                id: 3,
                 body: randromstr.generate(50)
             })
             .expect(403)
@@ -230,7 +230,7 @@ describe('[DELETE]', () => {
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .send({
-                id: 2
+                id: 3
             })
             .expect(403)
     })

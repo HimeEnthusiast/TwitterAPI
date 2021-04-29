@@ -156,7 +156,7 @@ describe('[deleteTweet]', () => {
 
 describe('[reply]', () => {
     it('[reply] tweetID and replyID found and row inserted, should return sql result object with affectedRows', async () => {
-        let result = await tweetQueries.reply(7, 8)
+        let result = await tweetQueries.reply(1, 7)
         expect(result.affectedRows > 0).toBeTruthy()
     })
 
