@@ -56,3 +56,16 @@ describe('[getConversationMessages]', () => {
         expect(result[0]).toBeFalsy()
     })
 })
+
+
+describe('[getOneMessage]', () => {
+    it('[getOneMessage] message found, should return object', async () => {
+        let result = await chatQueries.getConversationMessages(1)
+        expect(result).toBeTruthy()
+    })
+
+    it('[getOneMessage] message does not exist, should return nothing', async () => {
+        let result = await chatQueries.getConversationMessages('a')
+        expect(result[0]).toBeFalsy()
+    })
+})

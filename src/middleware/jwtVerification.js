@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 const requireJWTRoutes = [
     { path: "/tweet", get: false, post: true, put: true, delete: true },
     { path: "/jwt", post: false },
-    { path: "/users", post: false },
+    { path: "/user", post: false },
     { path: "/chat", get: true, post: true }
 ]
 

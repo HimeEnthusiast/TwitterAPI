@@ -1,6 +1,7 @@
 /** @module Jwt */
 const express = require('express')
 const router = express.Router()
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../database/userQueries')
 
@@ -31,7 +32,7 @@ router.post('/login', async (req, res) => {
     if (!userResult) {
         res.status(401).send({message: "Account access denied"})
     } else {
-        if (userResult.password === user.password) {
+        if (bcrypt.compareSync(user.password, userResult.password)) {
             jwt.sign({ user: user }, process.env.JWT_SECRET, (err, token) => {
                 res.json({ token })
             })

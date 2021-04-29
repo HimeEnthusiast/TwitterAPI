@@ -1,5 +1,6 @@
 /** @module Chat */
 const express = require('express')
+const chatQueries = require('../database/chatQueries')
 const router = express.Router()
 const chatDb = require('../database/chatQueries')
 const userDb = require('../database/userQueries')
@@ -11,51 +12,53 @@ const userDb = require('../database/userQueries')
  * @param {String} username - Recipient user
  * @returns {Object} If successful, will return success message and array of messages in conversation.
  */
-router.get('/:username', async (req, res) => {
+router.get('', async (req, res) => {
     let conversationId
     let conversation
 
     try {
-        conversationId = await getConversationId(req.body.user.user.username, req.params.username)
+        conversationId = await getConversationId(req.body.user.user.username, req.query.username)
     } catch (e) {
         res.status(500).send({
             message: "Error getting conversation",
             error: e
         })
+        return
     }
 
     if (conversationId) {
         if (!('status' in conversationId)) { // If conversationId object doesn't return a status code
             try {
-                conversation = getConversationMessages(conversationId.id)
+                conversation = await getConversationMessages(conversationId.id)
             } catch (e) {
                 res.status(500).send({
                     message: conversationId.message,
                     error: conversationId.error
                 })
+                return
             }
 
-            res.send({
-                message: "Conversation found",
-                convoMessages: conversation.messages
-            })
+            res.send(conversation)
         } else if (conversationId.status === 500) {
             res.status(500).send({
                 message: conversationId.message,
                 error: conversationId.error
             })
+            return
         } else if (conversationId.status === 404) {
             res.status(404).send({
                 message: conversationId.message,
                 currentUser: req.body.user.user.username,
                 targetUser: req.params.username
             })
+            return
         } else if (conversationId.status === 400) {
             res.status(400).send({
                 message: conversationId.message,
                 currentUser: req.body.user.user.username,
                 targetUser: req.params.username
             })
+            return
         }
     } else {
         res.send([])
@@ -72,8 +75,23 @@ router.get('/:username', async (req, res) => {
  */
 router.post('/', async (req, res) => {
     let conversation
-    let messages
+    let messageId
+    let message
 
+    if (req.body.user === null) {
+        res.status(400).send({
+            message: "User cannot be empty."
+        })
+        return
+    }
+
+    if (req.body.body === null || req.body.body.trim() === '') {
+        res.status(400).send({
+            message: "Message cannot be empty."
+        })
+        return
+    }
+    
     try {
         conversation = await getConversationId(req.body.user.user.username, req.body.username)
     } catch (e) {
@@ -81,45 +99,41 @@ router.post('/', async (req, res) => {
             message: "Error getting conversation (getConversationId)",
             error: e
         })
+        return
     }
 
 
     if (!('status' in conversation)) {
         try {
-            chatDb.sendMessage(req.body.body, conversation.currentUser, conversation.id)
+            messageId = await chatDb.sendMessage(req.body.body, conversation.currentUser, conversation.id)
         } catch (e) {
             res.status(500).send({
                 message: "Error sending message",
                 error: e
             })
+            return
         }
 
         try {
-            messages = await getConversationMessages(conversation.id)
+            message = await chatQueries.getOneMessage(messageId.insertId)
         } catch (e) {
             res.status(500).send({
-                message: "Error getting messages",
+                message: "Error getting message",
                 error: e
             })
+            return
         }
 
-        if (messages === 404) {
-            messages = "Messages not found"
-        } else if (messages === 500) {
-            messages = "Error getting messages"
-        }
-
-        res.send({
-            user: req.body.user.user.username,
-            message: messages[messages.length - 1]
-        })
+        res.send(message)
     } else if (conversation.status === 500) {
         res.status(500).send({
             message: "Error getting conversation (conversation status 500)",
             error: conversation.error
         })
     } else if (conversation.status === 404) {
-        res.status(404).send('User does not exist.')
+        res.status(404).send({ message: 'User does not exist.'})
+    } else if (conversation.status === 400) {
+        res.status(400).send({message: 'User cannot be null'})
     }
 })
 
@@ -134,6 +148,14 @@ router.post('/', async (req, res) => {
 async function getConversationId(usernameA, usernameB) {
     let userA
     let userB
+
+    if (usernameB === null || usernameB.trim() === '') {
+        // console.log("hi")
+        return {
+            status: 400,
+            message: "User cannot be null"
+        }
+    }
 
     try {
         userA = await userDb.getOneUserByUsername(usernameA)
@@ -183,12 +205,9 @@ async function getConversationId(usernameA, usernameB) {
                         error: e
                     }
                 }
-
-                console.log(conversation)
                 conversation["currentUser"] = userA.id
                 return conversation
             } else {
-                console.log(conversation)
                 conversation["currentUser"] = userA.id
                 return conversation
             }

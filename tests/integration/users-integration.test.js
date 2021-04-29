@@ -2,7 +2,6 @@ const app = require('../../main')
 const request = require('supertest')
 const randomstr = require('randomstring')
 
-
 let server = null;
 
 beforeEach(() => {
@@ -14,9 +13,9 @@ afterEach(async () => {
 })
 
 
-it('POST[/users/] registration failed user exists, should return 409', async () => {
+it('POST[/user] registration failed, user exists, should return 409', async () => {
   await request(app)
-    .post('/user/')
+    .post('/user')
     .send({
       username: 'user',
       password: 'pass'
@@ -24,9 +23,9 @@ it('POST[/users/] registration failed user exists, should return 409', async () 
     .expect(409)
 })
 
-it('POST[/users/] registration with new username successful, should return 200', async () => {
+it('POST[/user/] registration with new username successful, should return 200', async () => {
   await request(app)
-    .post('/user/')
+    .post('/user')
     .send({
       username: randomstr.generate(10),
       password: 'pass'

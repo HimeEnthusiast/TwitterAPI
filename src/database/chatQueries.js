@@ -86,5 +86,23 @@ chatQueries.getConversationMessages = (convoId) => {
     })
 }
 
+/**
+ * @function
+ * getOneMessage
+ * @description - Gets one messages from a conversation by id.
+ * @param {Number} messageId
+ * @returns {Promise} - Resolve sql response or reject with error message
+ */
+chatQueries.getOneMessage = (messageId) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM message WHERE id = ?', [messageId], (err, results) => {
+            if (err) {
+                return reject (err)
+            }
+            return resolve(results)
+        })
+    })
+}
+
 
 module.exports = chatQueries

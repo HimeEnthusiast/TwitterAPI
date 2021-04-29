@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "users",
+			"name": "user",
 			"item": [
 				{
 					"name": "localhost:3000/api/user",
@@ -29,7 +29,7 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:3000/users",
+							"raw": "localhost:3000/user",
 							"host": [
 								"localhost"
 							],

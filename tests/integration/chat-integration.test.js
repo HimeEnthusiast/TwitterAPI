@@ -29,7 +29,7 @@ describe('[POST]', () => {
             .expect(404)
     })
 
-    it('POST[/chat/] jwt invalid, shoul return 401', async () => {
+    it('POST[/chat/] jwt invalid, should return 401', async () => {
         await request(app)
             .post('/chat/')
             .set('Content-Type', 'application/json')
@@ -40,12 +40,36 @@ describe('[POST]', () => {
             })
             .expect(401)
     })
+
+    it('POST[/chat/] user is null, should return 400', async () => {
+        await request(app)
+            .post('/chat/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', process.env.TESTING_TOKEN)
+            .send({
+                username: null,
+                body: "hey bestie <3"
+            })
+            .expect(400)
+    })
+
+    it('POST[/chat/] message is null, should return 400', async () => {
+        await request(app)
+            .post('/chat/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', process.env.TESTING_TOKEN)
+            .send({
+                username: "user1",
+                body: null
+            })
+            .expect(400)
+    })
 })
 
 describe('[GET]', () => {
     it('GET[/chat/:username] conversation found and jwt valid, should return 200', async () => {
         await request(app)
-            .get('/chat/user1')
+            .get('/chat?username=user1')
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .expect(200)
@@ -53,7 +77,7 @@ describe('[GET]', () => {
 
     it('GET[/chat/:username] jwt not valid, should return 401', async () => {
         await request(app)
-            .get('/chat/user')
+            .get('/chat?username=user1')
             .set('Content-Type', 'application/json')
             .set('Authorization', 'ggfdgfdgdfgdf')
             .expect(401)
@@ -61,7 +85,7 @@ describe('[GET]', () => {
 
     it('GET[/chat/:username] user does not exist, should return 404', async () => {
         await request(app)
-            .get('/chat/fgfdgfdgfd')
+            .get('/chat?username=treterte')
             .set('Content-Type', 'application/json')
             .set('Authorization', process.env.TESTING_TOKEN)
             .expect(404)
